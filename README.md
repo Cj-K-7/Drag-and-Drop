@@ -1,6 +1,3 @@
-# schedular
-
- make "Schedule-To-Do list"
 
  npx create-react-app --template typescript
 
