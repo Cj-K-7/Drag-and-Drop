@@ -1,42 +1,47 @@
 import "recoil";
-import { atom, selector, useRecoilValue } from "recoil";
-
-export enum Categories {
-    "ToDo"="ToDo",
-    "Doing"="Doing",
-    "Done"="Done"
-}  
-
-export interface ISchedule {
-  id: number;
-  text: string;
-  time: string;
-  category: Categories;
-}
+import { atom } from "recoil";
 
 export const isDarkAtom = atom({
-  key: "isDark",
+  key: "isDarkKey",
   default: false,
 });
 
-const localData = localStorage.getItem("SCHEDULES")
-const JSONDATA = JSON.parse(localData as any)
 
-export const scheduleListAtom = atom<ISchedule[]>({
-  key: "scheduleList",
-  default: JSONDATA||[],
-});
+interface IdataAtom {
+  [key: string] : ITask[];
+}
 
-export const categoryStateAtom = atom<Categories>({
-    key: "categoryState",
-    default: Categories.ToDo
-});
-
-export const schedulesSelector = selector({
-  key: "schedulesSelector",
-  get: ({ get }) => {
-    const schedules = get(scheduleListAtom);
-    const category = get(categoryStateAtom);
-    return schedules.filter(data=> data.category === category);
+export const dataAtom = atom<IdataAtom>({
+  key: "dataKey",
+  default: {
+    Request: [
+      {
+        id: 123,
+        issue: "hi",
+        purpose: "a",
+        details: "ahelsdl",
+      },
+      {
+        id: 1323,
+        issue: "asdadaa",
+        purpose: "a",
+        details: "adaadssssa",
+      },
+    ],
+    In_Progress: [],
+    Completed: [],
+    Delayed: [],
   },
-}); // selector doesn't change state
+});
+
+export interface ITask {
+  id:number;
+  issue: string;
+  purpose: string;
+  details: string;
+}
+
+export const tasksAtom = atom<ITask[]>({
+  key: "taskKey",
+  default: []
+})

@@ -6,7 +6,7 @@ declare module 'styled-components' {
         hoverColor : string;
         highlightColor : string;
         bgColor : string;
-        bgColor1 : string;
-        bgColor2 : string;
+        boardColor : string;
+        cardColor : string;
     }
 }

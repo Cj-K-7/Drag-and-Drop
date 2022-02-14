@@ -31,7 +31,6 @@ body {
 	font-weight : 600;
 	color: ${p=> p.theme.textColor};
 	background-color: ${p=> p.theme.bgColor};
-	letter-spacing : 5px;
 }
 ol, ul {
 	list-style: none;
@@ -49,6 +48,6 @@ table {
 	border-spacing: 0;
 }
 input, button { 
-	letter-spacing : 3px;
+	letter-spacing : 1.6px;
 }
 `;

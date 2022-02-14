@@ -1,102 +1,96 @@
 import { useForm } from "react-hook-form";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import styled from "styled-components";
-import { categoryStateAtom, scheduleListAtom } from "../atoms";
+import { dataAtom, ITask } from "../atoms";
+import { IBoardProps } from "./Boards";
 
-interface IForm {
-  What: string;
-  When: string;
-}
-
-const FormBox = styled.form`
+const FormBox = styled.div`
   display: flex;
   flex-direction: column;
-  margin: 20px 0px;
+  max-width: 100%;
+  min-width: 600px;
+  padding: 26px;
+  border-radius: 20px;
+  box-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8);
+  background-color: ${(p) => p.theme.hoverColor};
   input {
-    margin-bottom: 12px;
-    padding: 12px 20px;
+    border: none;
+    border-radius: 20px;
+    background-color: ${(p) => p.theme.boardColor};
+    &:focus {
+      outline: none;
+      background-color: ${(p) => p.theme.highlightColor};
+    }
+  }
+  select {
+    border: none;
+    border-radius: 20px;
+    background-color: ${(p) => p.theme.boardColor};
+    &:focus {
+      outline: none;
+      background-color: ${(p) => p.theme.highlightColor};
+    }
   }
 `;
-const What = styled.input.attrs({ type: "text" })`
-  border: none;
-  font-weight: 600;
-  border-radius: 20px;
-  color: ${(p) => p.theme.textColor};
-  background-color: ${(p) => p.theme.bgColor2};
-  &::placeholder {
-    color: ${(p) => p.theme.textColor};
-  }
+const Title = styled.h1`
+  margin: 16px;
+  font-size: 38px;
 `;
-const When = styled.input.attrs({ type: "datetime-local" })`
-  border: none;
-  font-weight: 600;
-  border-radius: 20px;
-  color: ${(p) => p.theme.textColor};
-  background-color: ${(p) => p.theme.bgColor2};
-  ::-webkit-calendar-picker-indicator {
-    border-radius: 8px;
-    background-color: orange;
-  }
+const Issue = styled.input.attrs({ type: "text" })`
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 28px;
+`;
+const Purpose = styled.input.attrs({ type: "text" })`
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 18px;
+`;
+const Select = styled.select`
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 18px;
+`;
+const Contents = styled.textarea`
+  margin: 10px;
+  padding: 10px;
+  height: 500px;
+  background-color: white;
 `;
 const Btn = styled.button`
-  padding: 8px;
-  font-size: 20px;
-  font-weight: 600;
-  border-radius: 20px;
-  color: ${(p) => p.theme.bgColor};
-  background-color: ${(p) => p.theme.textColor};
-  &:hover {
-    color: ${(p) => p.theme.hoverColor};
-  }
-`;
-const Err = styled.span`
-  max-width: 100%;
-  padding-left: 8px;
-  padding-bottom: 12px;
-  color: ${(p) => p.theme.highlightColor};
-  font-size: 12px;
-  opacity: 0.5;
+  margin: 10px;
+  padding: 10px 20px;
+  align-self: flex-end;
+  width: fit-content;
 `;
 
-function Form() {
-  const setSchedules = useSetRecoilState(scheduleListAtom);
-  const category = useRecoilValue(categoryStateAtom);
-  const {
-    register, //해당 element 나 input 에 validation 규칙을 적용(훅 적용)
-    handleSubmit, //This function will receive the form data if form validation is successful.
-    formState: { errors }, //에러메세지를 가져와 사용 가능.
-    setValue, // name 으로 field 선택해서 그 field 의 value 를 바꿈.
-    setError, //에러 설정 함수(원하는 에러 조건 만들기)
-  } = useForm<IForm>();//hook Form 작성 <IForm>형태의 object 생성
+interface IForm {
+  id: number;
+  issue: string;
+  purpose: string;
+  prior: string;
+  details: string;
+}
 
-  const onValid = ({ What, When }: IForm) => {
-    if (What === "") {
-      setError("What", {}, { shouldFocus: true });
-    }
-    setSchedules((prev) => [
-      { id: Date.now(), text: What, time: When, category },
-      ...prev,
-    ]);
-    setValue("What", ""); //What name 으로 선정된 input 의 값을 빈칸(default)으로 만들어줌.
-  }; // Validation 확인 함수
-
-
+function Form({data, boardId}:IBoardProps) {
+  const { register, setValue, handleSubmit } = useForm<IForm>();
+  const setData = useSetRecoilState(dataAtom);
+  const onSubmit = ({ issue, purpose, details }: IForm) => {
+    const newReq = { id: Date.now(), issue, purpose, details };
+    setData((prev) => {
+      return { ...prev, [boardId]: [newReq, ...prev[boardId]] };
+    });
+    setValue("details", "");
+    setValue("issue", "");
+    setValue("purpose", "");
+  };
   return (
-    <FormBox onSubmit={handleSubmit(onValid)}>
-      <What
-        {...register("What", {
-          required: ' "Nothing?" ',
-        })}
-        placeholder="What"
-      />
-      <Err>{errors?.What?.message}</Err>
-      <When
-        {...register("When", {
-          required: ' "We need date/time " ',
-        })}
-      />
-      <Err>{errors?.When?.message}</Err>
-      <Btn> Add </Btn>
+    <FormBox onSubmit={handleSubmit(onSubmit)}>
+      <Title>Request Form</Title>
+      <Issue {...register("issue")} placeholder="Request/Agenda" required />
+      <Purpose {...register("purpose")} placeholder="Purpose/Goal" required />
+      <Contents {...register("details")} placeholder="Write Details..." />
+      <Btn>SUBMIT</Btn>
     </FormBox>
   );
 }
